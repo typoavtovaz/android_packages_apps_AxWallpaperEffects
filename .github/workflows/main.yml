@@ -25,7 +25,9 @@ jobs:
           mkdir -p app
           cat > app/build.gradle << 'EOF'
           apply plugin: 'com.android.application'
+          apply plugin: 'kotlin-android'
           android {
+            namespace "com.android.axion.wallpapereffects"
             compileSdk 34
             defaultConfig {
               applicationId "com.android.axion.wallpapereffects"
@@ -41,6 +43,13 @@ jobs:
                 res.srcDirs = ['../res']
                 assets.srcDirs = ['../assets']
               }
+            }
+            compileOptions {
+              sourceCompatibility JavaVersion.VERSION_17
+              targetCompatibility JavaVersion.VERSION_17
+            }
+            kotlinOptions {
+              jvmTarget = '17'
             }
           }
           dependencies {
