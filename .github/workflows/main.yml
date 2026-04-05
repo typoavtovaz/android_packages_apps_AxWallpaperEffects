@@ -18,11 +18,58 @@ jobs:
         uses: android-actions/setup-android@v3
       - name: Create Gradle files
         run: |
-          echo 'rootProject.name = "AxWallpaperEffects"' > settings.gradle
-          echo 'include ":app"' >> settings.gradle
+          cat > build.gradle << 'BUILDEOF'
+          buildscript {
+            repositories {
+              google()
+              mavenCentral()
+            }
+            dependencies {
+              classpath 'com.android.tools.build:gradle:8.1.0'
+              classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.0'
+            }
+          }
+          allprojects {
+            repositories {
+              google()
+              mavenCentral()
+            }
+          }
+          BUILDEOF
+          cat > settings.gradle << 'SETEOF'
+          rootProject.name = "AxWallpaperEffects"
+          include ':app'
+          SETEOF
           mkdir -p app
-          printf 'plugins {\n    id "com.android.application"\n    id "org.jetbrains.kotlin.android"\n}\nandroid {\n    namespace "com.android.axion.wallpapereffects"\n    compileSdk 34\n    defaultConfig {\n        applicationId "com.android.axion.wallpapereffects"\n        minSdk 31\n        targetSdk 34\n    }\n    sourceSets {\n        main {\n            manifest.srcFile "../AndroidManifest.xml"\n            java.srcDirs = ["../src"]\n            res.srcDirs = ["../res"]\n            assets.srcDirs = ["../assets"]\n        }\n    }\n    compileOptions {\n        sourceCompatibility JavaVersion.VERSION_17\n        targetCompatibility JavaVersion.VERSION_17\n    }\n    kotlinOptions { jvmTarget = "17" }\n}\ndependencies {\n    implementation "androidx.core:core-ktx:1.12.0"\n}\n' > app/build.gradle
-          printf 'plugins {\n    id "com.android.application" version "8.1.0" apply false\n    id "org.jetbrains.kotlin.android" version "1.9.0" apply false\n}\n' > build.gradle
+          cat > app/build.gradle << 'APPEOF'
+          apply plugin: 'com.android.application'
+          apply plugin: 'kotlin-android'
+          android {
+            namespace "com.android.axion.wallpapereffects"
+            compileSdkVersion 34
+            defaultConfig {
+              applicationId "com.android.axion.wallpapereffects"
+              minSdkVersion 31
+              targetSdkVersion 34
+            }
+            sourceSets {
+              main {
+                manifest.srcFile '../AndroidManifest.xml'
+                java.srcDirs = ['../src']
+                res.srcDirs = ['../res']
+                assets.srcDirs = ['../assets']
+              }
+            }
+            compileOptions {
+              sourceCompatibility JavaVersion.VERSION_17
+              targetCompatibility JavaVersion.VERSION_17
+            }
+            kotlinOptions { jvmTarget = '17' }
+          }
+          dependencies {
+            implementation 'androidx.core:core-ktx:1.12.0'
+          }
+          APPEOF
           gradle wrapper --gradle-version 8.1
       - name: Build APK
         run: ./gradlew assembleDebug
