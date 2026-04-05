@@ -78,4 +78,3 @@ jobs:
         with:
           name: WallpaperEffects-debug
           path: app/build/outputs/apk/debug/app-debug.apk
-```
