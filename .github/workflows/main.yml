@@ -16,9 +16,51 @@ jobs:
           distribution: 'temurin'
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
-      - name: Create Gradle wrapper
-        run: gradle wrapper
-      - name: Build
+      - name: Create Gradle project
+        run: |
+          cat > settings.gradle << 'EOF'
+          rootProject.name = 'AxWallpaperEffects'
+          include ':app'
+          EOF
+          mkdir -p app
+          cat > app/build.gradle << 'EOF'
+          apply plugin: 'com.android.application'
+          android {
+            compileSdk 34
+            defaultConfig {
+              applicationId "com.android.axion.wallpapereffects"
+              minSdk 31
+              targetSdk 34
+              versionCode 1
+              versionName "1.0"
+            }
+            sourceSets {
+              main {
+                manifest.srcFile '../AndroidManifest.xml'
+                java.srcDirs = ['../src']
+                res.srcDirs = ['../res']
+                assets.srcDirs = ['../assets']
+              }
+            }
+          }
+          dependencies {
+            implementation 'androidx.core:core-ktx:1.12.0'
+          }
+          EOF
+          cat > build.gradle << 'EOF'
+          buildscript {
+            repositories { google(); mavenCentral() }
+            dependencies {
+              classpath 'com.android.tools.build:gradle:8.2.0'
+              classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.0'
+            }
+          }
+          allprojects {
+            repositories { google(); mavenCentral() }
+          }
+          EOF
+          gradle wrapper --gradle-version 8.2
+      - name: Build APK
         run: ./gradlew assembleDebug
       - name: Upload APK
         uses: actions/upload-artifact@v4
